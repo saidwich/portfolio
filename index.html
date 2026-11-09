@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Darrel Cedric Cirineo, a Computer Science student looking for an OJT or internship in networking, cybersecurity, or IT support.">
 <meta name="theme-color" content="#0E1A2E">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%94%8C%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website"><meta property="og:title" content="Darrel Cedric Cirineo – Networking, Security & IT Support">
 <meta property="og:description" content="Servers, cabling, security labs and a thesis on hate speech detection. Open to OJT and internships.">
 <title>Darrel Cedric Cirineo – Networking, Security & IT Support</title>
@@ -421,6 +420,9 @@ html.boot.skip{--bd:0s}
  .abtxt .lead{font-size:1.2rem}.doing li{font-size:clamp(1.6rem,7vw,2.2rem)}
  .nl{padding-top:5rem}
 }
+/* contact fallbacks */
+.nlh a,.nlh button{font:inherit;font-weight:600;color:#0A0A0A;text-decoration:underline;text-underline-offset:3px;background:none;border:0;padding:0;cursor:pointer}
+.nlh .sep{margin:0 .5rem}
 </style>
 <script>if(!matchMedia("(prefers-reduced-motion:reduce)").matches)document.documentElement.className+=" boot"</script>
 </head>
@@ -571,7 +573,7 @@ html.boot.skip{--bd:0s}
   </div>
   <div>
     <form class="nlf" id="hi" novalidate><input id="hiem" type="email" placeholder="Your email" aria-label="Your email" autocomplete="email"><button type="submit">Say hi ↗</button></form>
-    <p class="nlh">This opens your email app with a short message to me.</p>
+    <p class="nlh" id="nlh">Or email me directly: <a href="mailto:dcr.cirineo@gmail.com">dcr.cirineo@gmail.com</a></p>
   </div>
 </section>
 <footer class="ft" id="end">
@@ -668,10 +670,30 @@ if(!still){
   addEventListener('resize',stp);
 }
 
-/* contact form */
+/* contact form: opens Gmail in a new tab, copies the address, and always shows working links */
+var MAIL='dcr.cirineo@gmail.com';
+function mailParts(v){return {sub:'Hello from your portfolio',body:'Hi Darrel,\n\nI found your portfolio.'+(v?' You can reach me at '+v+'.':'')+'\n'}}
+function gmailUrl(m){return 'https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(MAIL)+'&su='+encodeURIComponent(m.sub)+'&body='+encodeURIComponent(m.body)}
+function mailtoUrl(m){return 'mailto:'+MAIL+'?subject='+encodeURIComponent(m.sub)+'&body='+encodeURIComponent(m.body)}
+function copyOld(t){var a=document.createElement('textarea'),ok=false;a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{ok=document.execCommand('copy')}catch(e){}a.remove();return ok}
+function copyText(t){
+  try{if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t).then(function(){return true},function(){return copyOld(t)})}catch(e){}
+  return Promise.resolve(copyOld(t));
+}
+function lk(t,href){var a=document.createElement('a');a.textContent=t;a.href=href;if(href.indexOf('http')===0){a.target='_blank';a.rel='noopener noreferrer'}return a}
+function sep(){var s=document.createElement('span');s.className='sep';s.textContent='or';return s}
+function showMail(opened,copied,m){
+  var n=document.getElementById('nlh');n.textContent='';
+  n.appendChild(document.createTextNode((opened?'Gmail is opening in a new tab. ':'I couldn’t open a new tab from here. ')+'My email is '+MAIL+(copied?' (copied). ':'. ')));
+  n.appendChild(lk('Open Gmail',gmailUrl(m)));n.appendChild(sep());n.appendChild(lk('Use my email app',mailtoUrl(m)));n.appendChild(sep());
+  var b=document.createElement('button');b.type='button';b.textContent='Copy again';b.addEventListener('click',function(){copyText(MAIL).then(function(ok){b.textContent=ok?'Copied ✓':'Press Ctrl+C on the address'})});n.appendChild(b);
+}
 document.getElementById('hi').addEventListener('submit',function(e){
-  e.preventDefault();var v=document.getElementById('hiem').value.trim();
-  location.href='mailto:dcr.cirineo@gmail.com?subject='+encodeURIComponent('Hello from your portfolio')+'&body='+encodeURIComponent('Hi Darrel,\n\nI found your portfolio.'+(v?' You can reach me at '+v+'.':'')+'\n');
+  e.preventDefault();
+  var btn=e.target.querySelector('button'),v=document.getElementById('hiem').value.trim(),m=mailParts(v),w=null;
+  try{w=window.open(gmailUrl(m),'_blank','noopener')}catch(x){}
+  btn.textContent='Opening…';setTimeout(function(){btn.textContent='Say hi ↗'},1800);
+  copyText(MAIL).then(function(ok){showMail(!!w,ok,m)});
 });
 /* footer letters */
 var wm=document.getElementById('wm'),fl=document.getElementById('fl'),ft=document.getElementById('end');
